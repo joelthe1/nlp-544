@@ -4,13 +4,13 @@ if len(sys.argv) < 2:
     print "Input file now specified."
     exit()
 
-def tost(i):
-    result = []
-    while i:
-        result.append(chr(i&0xFF))
-        i >>= 8
-    result.reverse()
-    return ''.join(result)
+def to_unicode_byte(num):
+    value = []
+    while num:
+        value.append(chr(num&0xFF))
+        num >>= 8
+    value.reverse()
+    return ''.join(value)
 
 wfile = open('utf8encoder_out.txt', 'wb')
 
@@ -22,11 +22,10 @@ with open(sys.argv[1], 'rb') as f:
         b1 = ord(utf16_byte[0])
         b2 = ord(utf16_byte[1])
         if b1 == 0xfe and b2 == 0xff:
-            print 'it is BOM'
             continue
         
         if b1 == 0x00:
-            wfile.write(tost(b2))
+            wfile.write(to_unicode_byte(b2))
         elif b1 < 0x08:
             b2_rem = b2 & 0xc0 #0xc0=11000000
             b2_rem >>= 6
@@ -36,8 +35,8 @@ with open(sys.argv[1], 'rb') as f:
             b1_rem = b1_rem | b2_rem
             b1 = 0x1f & b1_rem #0x1f=00011111
             b1 = b1 | 0xc0
-            wfile.write(tost(b1))
-            wfile.write(tost(b2))
+            wfile.write(to_unicode_byte(b1))
+            wfile.write(to_unicode_byte(b2))
         else:
             b1_rem1 = b1 & 0xf0 #0xf0=11110000
             b1_rem1 >>= 4
@@ -52,6 +51,6 @@ with open(sys.argv[1], 'rb') as f:
 
             b2_rem2 = b2 & 0x3f #0x3f=00111111
             utf8_b3 = b2_rem2 | 0x80 #0x80=10000000
-            wfile.write(tost(utf8_b1))
-            wfile.write(tost(utf8_b2))
-            wfile.write(tost(utf8_b3))
+            wfile.write(to_unicode_byte(utf8_b1))
+            wfile.write(to_unicode_byte(utf8_b2))
+            wfile.write(to_unicode_byte(utf8_b3))
