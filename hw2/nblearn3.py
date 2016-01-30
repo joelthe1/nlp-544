@@ -2,7 +2,6 @@ import os
 import sys
 from os.path import join
 from decimal import *
-import pickle
 
 path = sys.argv[1]
 if not os.path.exists(path):
@@ -139,12 +138,12 @@ T_deceptive = sum(deceptive.values())
 #N_deceptive = 640
 #N = 1280
 
-print(N_positive)
-print(N_negative)
-print(N_truthful)
-print(N_deceptive)
-print(N)
-print(vocab_count)
+#print(N_positive)
+#print(N_negative)
+#print(N_truthful)
+#print(N_deceptive)
+#print(N)
+#print(vocab_count)
 
 wfile = open('nbmodel.txt', 'w')
 write_p()
