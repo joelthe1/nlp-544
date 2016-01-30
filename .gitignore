@@ -60,6 +60,7 @@ target/
 
 # folders
 reading*
-op_spam_train/
 hw1/*.txt
 op_spam_*/
+hw2/nbmodel.txt
+hw2/nboutput.txt

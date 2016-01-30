@@ -2,6 +2,7 @@ import os
 import sys
 from os.path import join
 from decimal import *
+import pickle
 
 path = sys.argv[1]
 if not os.path.exists(path):
@@ -100,7 +101,7 @@ def write_p():
     wfile.write('d:'+str(t)+'\n')
 
     for word in vocabulary:
-        wfile.write(word+'=')
+        wfile.write(word+'=*=')
         calc_p(word)
 
 N_positive = 0
@@ -120,11 +121,23 @@ exceptions = ['','a','about','above','after','again','against','all','am','an','
 
 tokenize()
 
+#positive = pickle.load( open( "save_p.p", "rb" ) )
+#negative = pickle.load( open( "save_n.p", "rb" ) )
+#truthful = pickle.load( open( "save_t.p", "rb" ) )
+#deceptive = pickle.load( open( "save_d.p", "rb" ) )
+#vocabulary = pickle.load( open( "save_v.p", "rb" ) )
+
 vocab_count = len(vocabulary)
 T_positive = sum(positive.values())
 T_negative = sum(negative.values())
 T_truthful = sum(truthful.values())
 T_deceptive = sum(deceptive.values())
+
+#N_positive = 640
+#N_negative = 640
+#N_truthful = 640
+#N_deceptive = 640
+#N = 1280
 
 print(N_positive)
 print(N_negative)
@@ -136,3 +149,4 @@ print(vocab_count)
 wfile = open('nbmodel.txt', 'w')
 write_p()
 wfile.close()
+
