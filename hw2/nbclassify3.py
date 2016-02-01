@@ -5,7 +5,7 @@ from math import log
 
 path = sys.argv[1]
 def file_teardown(file_path):
-    punct = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n'
+    punct = '"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n'
     with open(file_path) as f:
         return map(lambda w: w.lower().strip(punct), f.read().split())
 
