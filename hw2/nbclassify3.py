@@ -5,7 +5,7 @@ from math import log
 
 path = sys.argv[1]
 def file_teardown(file_path):
-    punct = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n'
+    punct = '"#$&\'()*+,-./:;<=>@[\\]^_`{|}~\n'
     with open(file_path) as f:
         return map(lambda w: w.lower().strip(punct), f.read().split())
 
@@ -18,6 +18,28 @@ def tokenizeClassify():
                 continue
             N += 1
             words = file_teardown(file_path)
+#            nwords = []
+#            for w in words:
+#                if w[-2:] == '\'s':
+#                    nwords.append(w[:-2])
+#                elif w[-3:] == 'n\'t':
+#                    nwords.append(w[:-3])
+#                    nwords.append('not')
+#                elif w[-3:] == '\'ll':
+#                    nwords.append(w[:-3])
+#                    nwords.append('will')
+#                elif w[-2:] == '\'d':
+#                    nwords.append(w[:-2])
+#                    nwords.append('would')
+#                elif w[-3:] == '\'ve':
+#                    nwords.append(w[:-3])
+#                    nwords.append('have')
+#                elif w[-3:] == '\'re':
+#                    nwords.append(w[:-3])
+#                    nwords.append('are')
+#                else:
+#                    nwords.append(w)
+            
             classify(words, file_path)
 
 def classify(words, file_path):
@@ -30,6 +52,8 @@ def classify(words, file_path):
     score['d'] = log(p_deceptive)
 
     for word in words:
+#        if word.isdigit():
+#            word = '__NUM_VALUE__'
         if word in condProb:
             score['p'] += log(condProb[word]['p'])
             score['n'] += log(condProb[word]['n'])
@@ -72,7 +96,7 @@ def classify(words, file_path):
 def setup():
     global p_positive, p_negative, p_truthful, p_deceptive
     with open('nbmodel.txt', 'r') as f:
-        priors = f.readline().strip().split('|')
+        priors = f.readline().strip().split('||')
         for prior in priors:
             val = prior.split(':')
             if val[0] == 'p':
@@ -86,7 +110,7 @@ def setup():
 
         for line in f:
             val = line.strip().split('=*=')
-            prob = val[1].split('|')
+            prob = val[1].split('||')
             inner = {}
             for p in prob:
                 t = p.split(':')

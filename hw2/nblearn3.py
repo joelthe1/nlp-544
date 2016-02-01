@@ -19,6 +19,28 @@ def tokenize():
                 continue
             N += 1
             words = file_teardown(file_path)
+#            nwords = []
+#            for w in words:
+#                if w[-2:] == '\'s':
+#                    nwords.append(w[:-2])
+#                elif w[-3:] == 'n\'t':
+#                    nwords.append(w[:-3])
+#                    nwords.append('not')
+#                elif w[-3:] == '\'ll':
+#                    nwords.append(w[:-3])
+#                    nwords.append('will')
+#                elif w[-2:] == '\'d':
+#                    nwords.append(w[:-2])
+#                    nwords.append('would')
+#                elif w[-3:] == '\'ve':
+#                    nwords.append(w[:-3])
+#                    nwords.append('have')
+#                elif w[-3:] == '\'re':
+#                    nwords.append(w[:-3])
+#                    nwords.append('are')
+#                else:
+#                    nwords.append(w)
+
             if 'positive_' in root and 'truthful_' in root:
                 N_positive += 1
                 N_truthful += 1
@@ -40,6 +62,8 @@ def update_helper(words, category1, category2):
     for word in words:
         if word in exceptions:
             continue
+#        if word.isdigit():
+#            word = '__NUM_VALUE__'
         if word in vocabulary:
             vocabulary[word] += 1
         else:
@@ -56,7 +80,7 @@ def update_helper(words, category1, category2):
             category2[word] = 1
 
 def file_teardown(file_path):
-    punct = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n'
+    punct = '"#$&\'()*+,-./:;<=>@[\\]^_`{|}~\n'
     with open(file_path) as f:
         return map(lambda w: w.lower().strip(punct), f.read().split())
 
@@ -65,19 +89,19 @@ def calc_p(word):
     if word in positive:
         Tct += positive[word]
     pdc = Decimal(Tct)/(Decimal(T_positive)+Decimal(vocab_count))
-    wfile.write('p:'+str(pdc)+'|')
+    wfile.write('p:'+str(pdc)+'||')
     
     Tct = 1
     if word in negative:
         Tct += negative[word]
     pdc = Decimal(Tct)/(Decimal(T_negative)+Decimal(vocab_count))
-    wfile.write('n:'+str(pdc)+'|')
+    wfile.write('n:'+str(pdc)+'||')
 
     Tct = 1
     if word in truthful:
         Tct += truthful[word]
     pdc = Decimal(Tct)/(Decimal(T_truthful)+Decimal(vocab_count))
-    wfile.write('t:'+str(pdc)+'|')
+    wfile.write('t:'+str(pdc)+'||')
     
     Tct = 1
     if word in deceptive:
@@ -88,13 +112,13 @@ def calc_p(word):
 def write_p():
     #Write prior Ps
     t = Decimal(N_positive)/Decimal(N)
-    wfile.write('p:'+str(t)+'|')
+    wfile.write('p:'+str(t)+'||')
     
     t = Decimal(N_negative)/Decimal(N)
-    wfile.write('n:'+str(t)+'|')
+    wfile.write('n:'+str(t)+'||')
     
     t = Decimal(N_truthful)/Decimal(N)
-    wfile.write('t:'+str(t)+'|')
+    wfile.write('t:'+str(t)+'||')
 
     t = Decimal(N_deceptive)/Decimal(N)
     wfile.write('d:'+str(t)+'\n')
@@ -114,36 +138,17 @@ negative = {}
 truthful = {}
 deceptive = {}
 vocabulary = {}
+exceptions = ['a','about','above','after','again','against','all','am','an','and','any','are','as','at','be','because','been','before','being','below','between','both','by','can\'t','cannot','could','couldn\'t','did','do','does','doesn\'t','doing','during','each','few','for','from','further','had','hadn\'t','has','hasn\'t','have','having','he','he\'d','he\'ll','he\'s','her','here','here\'s','hers','herself','him','himself','his','how','how\'s','i\'d','i\'ll','i\'m','i\'ve','if','in','into','is','it','it\'s','its','itself','let\'s','me','more','most','mustn\'t','my','myself','of','off','on','once','only','or','other','our','ours,ourselves','out','over','own','same','shan\'t','she','she\'d','she\'ll','she\'s','should','so','some','such','than','that','that\'s','the','their','theirs','them','themselves','then','there','there\'s','these','they','they\'d','they\'ll','they\'re','they\'ve','this','those','through','to','too','until','up','very','we','we\'d','we\'ll','we\'re','we\'ve','were','weren\'t','what','what\'s','when','when\'s','where','where\'s','which','while','who','who\'s','whom','with','would','wouldn\'t','you','you\'d','you\'ll','you\'re','you\'ve','your','yours','yourself','yourselves']
 
-#exceptions = []
-exceptions = ['','a','about','above','after','again','against','all','am','an','and','any','are','aren\'t','as','at','be','because','been','before','being','below','between','both','but','by','can\'t','cannot','could','couldn\'t','did','didn\'t','do','does','doesn\'t','doing','don\'t','down','during','each','few','for','from','further','had','hadn\'t','has','hasn\'t','have','haven\'t','having','he','he\'d','he\'ll','he\'s','her','here','here\'s','hers','herself','him','himself','his','how','how\'s','i','i\'d','i\'ll','i\'m','i\'ve','if','in','into','is','isn\'t','it','it\'s','its','itself','let\'s','me','more','most','mustn\'t','my','myself','no','nor','not','of','off','on','once','only','or','other','ought','our','ours,ourselves','out','over','own','same','shan\'t','she','she\'d','she\'ll','she\'s','should','shouldn\'t','so','some','such','than','that','that\'s','the','their','theirs','them','themselves','then','there','there\'s','these','they','they\'d','they\'ll','they\'re','they\'ve','this','those','through','to','too','under','until','up','very','was','wasn\'t','we','we\'d','we\'ll','we\'re','we\'ve','were','weren\'t','what','what\'s','when','when\'s','where','where\'s','which','while','who','who\'s','whom','why','why\'s','with','won\'t','would','wouldn\'t','you','you\'d','you\'ll','you\'re','you\'ve','your','yours','yourself','yourselves']
+#exceptions = ['','a','about','above','after','again','against','all','am','an','and','any','are','aren\'t','as','at','be','because','been','before','being','below','between','both','but','by','can\'t','cannot','could','couldn\'t','did','didn\'t','do','does','doesn\'t','doing','don\'t','down','during','each','few','for','from','further','had','hadn\'t','has','hasn\'t','have','haven\'t','having','he','he\'d','he\'ll','he\'s','her','here','here\'s','hers','herself','him','himself','his','how','how\'s','i','i\'d','i\'ll','i\'m','i\'ve','if','in','into','is','isn\'t','it','it\'s','its','itself','let\'s','me','more','most','mustn\'t','my','myself','no','nor','not','of','off','on','once','only','or','other','ought','our','ours,ourselves','out','over','own','same','shan\'t','she','she\'d','she\'ll','she\'s','should','shouldn\'t','so','some','such','than','that','that\'s','the','their','theirs','them','themselves','then','there','there\'s','these','they','they\'d','they\'ll','they\'re','they\'ve','this','those','through','to','too','under','until','up','very','was','wasn\'t','we','we\'d','we\'ll','we\'re','we\'ve','were','weren\'t','what','what\'s','when','when\'s','where','where\'s','which','while','who','who\'s','whom','why','why\'s','with','won\'t','would','wouldn\'t','you','you\'d','you\'ll','you\'re','you\'ve','your','yours','yourself','yourselves']
 
 tokenize()
-
-#positive = pickle.load( open( "save_p.p", "rb" ) )
-#negative = pickle.load( open( "save_n.p", "rb" ) )
-#truthful = pickle.load( open( "save_t.p", "rb" ) )
-#deceptive = pickle.load( open( "save_d.p", "rb" ) )
-#vocabulary = pickle.load( open( "save_v.p", "rb" ) )
 
 vocab_count = len(vocabulary)
 T_positive = sum(positive.values())
 T_negative = sum(negative.values())
 T_truthful = sum(truthful.values())
 T_deceptive = sum(deceptive.values())
-
-#N_positive = 640
-#N_negative = 640
-#N_truthful = 640
-#N_deceptive = 640
-#N = 1280
-
-#print(N_positive)
-#print(N_negative)
-#print(N_truthful)
-#print(N_deceptive)
-#print(N)
-#print(vocab_count)
 
 wfile = open('nbmodel.txt', 'w')
 write_p()
