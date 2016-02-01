@@ -64,3 +64,5 @@ hw1/*.txt
 op_spam_*/
 hw2/nbmodel.txt
 hw2/nboutput.txt
+hw2/run.sh
+hw2/output.txt
