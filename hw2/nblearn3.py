@@ -11,36 +11,12 @@ if not os.path.exists(path):
 def tokenize():
     global N_positive, N_negative, N_truthful, N_deceptive, N
     for root, sdirs, files in os.walk(path):
-#        print('root = ' + root)
-#            print('\t- file %s (full path: %s)' % (filename, file_path))
         for filename in files:
             file_path = os.path.join(root, filename)
-            if filename.startswith('.') or 'fold' not in file_path:
+            if filename.startswith('.') or 'fold' not in file_path or filename == 'LICENSE' or filename == 'README.md' or filename == 'README.txt':
                 continue
             N += 1
             words = file_teardown(file_path)
-#            nwords = []
-#            for w in words:
-#                if w[-2:] == '\'s':
-#                    nwords.append(w[:-2])
-#                elif w[-3:] == 'n\'t':
-#                    nwords.append(w[:-3])
-#                    nwords.append('not')
-#                elif w[-3:] == '\'ll':
-#                    nwords.append(w[:-3])
-#                    nwords.append('will')
-#                elif w[-2:] == '\'d':
-#                    nwords.append(w[:-2])
-#                    nwords.append('would')
-#                elif w[-3:] == '\'ve':
-#                    nwords.append(w[:-3])
-#                    nwords.append('have')
-#                elif w[-3:] == '\'re':
-#                    nwords.append(w[:-3])
-#                    nwords.append('are')
-#                else:
-#                    nwords.append(w)
-
             if 'positive_' in root and 'truthful_' in root:
                 N_positive += 1
                 N_truthful += 1
@@ -62,8 +38,6 @@ def update_helper(words, category1, category2):
     for word in words:
         if word in exceptions:
             continue
-#        if word.isdigit():
-#            word = '__NUM_VALUE__'
         if word in vocabulary:
             vocabulary[word] += 1
         else:
@@ -138,9 +112,8 @@ negative = {}
 truthful = {}
 deceptive = {}
 vocabulary = {}
-exceptions = ['a','about','above','after','again','against','all','am','an','and','any','are','as','at','be','because','been','before','being','below','between','both','by','can\'t','cannot','could','couldn\'t','did','do','does','doesn\'t','doing','during','each','few','for','from','further','had','hadn\'t','has','hasn\'t','have','having','he','he\'d','he\'ll','he\'s','her','here','here\'s','hers','herself','him','himself','his','how','how\'s','i\'d','i\'ll','i\'m','i\'ve','if','in','into','is','it','it\'s','its','itself','let\'s','me','more','most','mustn\'t','my','myself','of','off','on','once','only','or','other','our','ours,ourselves','out','over','own','same','shan\'t','she','she\'d','she\'ll','she\'s','should','so','some','such','than','that','that\'s','the','their','theirs','them','themselves','then','there','there\'s','these','they','they\'d','they\'ll','they\'re','they\'ve','this','those','through','to','too','until','up','very','we','we\'d','we\'ll','we\'re','we\'ve','were','weren\'t','what','what\'s','when','when\'s','where','where\'s','which','while','who','who\'s','whom','with','would','wouldn\'t','you','you\'d','you\'ll','you\'re','you\'ve','your','yours','yourself','yourselves']
 
-#exceptions = ['','a','about','above','after','again','against','all','am','an','and','any','are','aren\'t','as','at','be','because','been','before','being','below','between','both','but','by','can\'t','cannot','could','couldn\'t','did','didn\'t','do','does','doesn\'t','doing','don\'t','down','during','each','few','for','from','further','had','hadn\'t','has','hasn\'t','have','haven\'t','having','he','he\'d','he\'ll','he\'s','her','here','here\'s','hers','herself','him','himself','his','how','how\'s','i','i\'d','i\'ll','i\'m','i\'ve','if','in','into','is','isn\'t','it','it\'s','its','itself','let\'s','me','more','most','mustn\'t','my','myself','no','nor','not','of','off','on','once','only','or','other','ought','our','ours,ourselves','out','over','own','same','shan\'t','she','she\'d','she\'ll','she\'s','should','shouldn\'t','so','some','such','than','that','that\'s','the','their','theirs','them','themselves','then','there','there\'s','these','they','they\'d','they\'ll','they\'re','they\'ve','this','those','through','to','too','under','until','up','very','was','wasn\'t','we','we\'d','we\'ll','we\'re','we\'ve','were','weren\'t','what','what\'s','when','when\'s','where','where\'s','which','while','who','who\'s','whom','why','why\'s','with','won\'t','would','wouldn\'t','you','you\'d','you\'ll','you\'re','you\'ve','your','yours','yourself','yourselves']
+exceptions = ['a','about','above','after','again','against','all','am','an','and','any','are','as','at','be','because','been','before','being','below','between','both','by','can\'t','cannot','could','couldn\'t','did','do','does','doesn\'t','doing','during','each','few','for','from','further','had','hadn\'t','has','hasn\'t','have','having','he','he\'d','he\'ll','he\'s','her','here','here\'s','hers','herself','him','himself','his','how','how\'s','i\'d','i\'ll','i\'m','i\'ve','if','in','into','is','it','it\'s','its','itself','let\'s','me','more','most','mustn\'t','my','myself','of','off','on','once','only','or','other','our','ours,ourselves','out','over','own','same','shan\'t','she','she\'d','she\'ll','she\'s','should','so','some','such','than','that','that\'s','the','their','theirs','them','themselves','then','there','there\'s','these','they','they\'d','they\'ll','they\'re','they\'ve','this','those','through','to','too','until','up','very','we','we\'d','we\'ll','we\'re','we\'ve','were','weren\'t','what','what\'s','when','when\'s','where','where\'s','which','while','who','who\'s','whom','with','would','wouldn\'t','you','you\'d','you\'ll','you\'re','you\'ve','your','yours','yourself','yourselves']
 
 tokenize()
 
@@ -153,4 +126,3 @@ T_deceptive = sum(deceptive.values())
 wfile = open('nbmodel.txt', 'w')
 write_p()
 wfile.close()
-
