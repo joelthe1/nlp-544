@@ -18,7 +18,7 @@ def tokenize():
             N += 1
             words = file_teardown(file_path)
             if 'positive_' in root and 'truthful_' in root:
-                N_positive += 1
+g                N_positive += 1
                 N_truthful += 1
                 update_helper(words, positive, truthful)
             elif 'positive_' in root and 'deceptive_' in root:
