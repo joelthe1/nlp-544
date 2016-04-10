@@ -10,7 +10,7 @@ if not os.path.exists(path):
     exit()
 
 def separate(token):
-    patt = re.compile(r'(.*?)\/([A-Z0-9]{2})')
+    patt = re.compile(r'(.*)\/([A-Z0-9]{2})')
     res = patt.match(token)
     #TODO: if res: for safety
     word = res.group(1)
@@ -21,7 +21,6 @@ def tokenize():
     print(path)
     with open(path, 'r') as rfile:
         for line in rfile.readlines():
-            print(line)
             if not line.strip():
                 continue
             line_segs = line.strip().split(' ')
@@ -31,7 +30,7 @@ def tokenize():
                 token = separate(seg)
                 insert(prev, token)
                 prev = token
-    print mapping
+#    print mapping
 
 def insert(prev, curr):
     global mapping
@@ -39,7 +38,7 @@ def insert(prev, curr):
         mapping[curr['tag']] = {}
         mapping[curr['tag']]['tags'] = {prev['tag']: 1}
         mapping[curr['tag']]['words'] = {curr['word']: 1}
-        mapping[curr['tag']]['emmis_denom'] = 1    
+        mapping[curr['tag']]['emmis_denom'] = 1
     else:
         if prev['tag'] in mapping[curr['tag']]['tags']:
             mapping[curr['tag']]['tags'][prev['tag']] += 1
@@ -54,10 +53,32 @@ def insert(prev, curr):
 
     if prev['tag'] not in mapping:
         mapping[prev['tag']] = {}
+        mapping[prev['tag']] = {}
+        mapping[prev['tag']]['tags'] = {}
 
     if 'trans_denom' not in mapping[prev['tag']]:
         mapping[prev['tag']]['trans_denom'] = 1
     else:
         mapping[prev['tag']]['trans_denom'] += 1
 
+def calc_p():
+    probabalities = {}
+    tag_set = mapping.keys()
+    tag_set_size = len(tag_set)
+    for tag1 in tag_set:
+        probabalities[tag1] = {'tags':{}, 'words':{}}
+        for tag2 in tag_set:
+            numer = 1
+            denom = 0
+            print(mapping[tag1])
+            if tag2 in mapping[tag1]['tags']:
+                numer = mapping[tag1]['tags'][tag2]
+            p_t1_gvn_t2 = Decimal(numer)/(Decimal(mapping[tag2]['tags']['trans_denom'])+Decimal(tag_set_size))
+            probabalities[tag1]['tags'][tag2] = p_t1_gvn_t2
+        for word in mapping[tag1]['words'].keys():
+            p_w_gvn_t1 = Decimal(mapping[tag1]['words'][word])/Decimal(mapping[tag1]['emmis_denom'])
+            probabalities[tag1]['words'][word] = p_w_gvn_t1
+    print(probabilities)
+
 tokenize()
+calc_p()
