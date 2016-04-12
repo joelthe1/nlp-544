@@ -2,6 +2,7 @@ import pickle
 import numpy as np
 import sys
 import os
+from decimal import *
 
 path = sys.argv[1]
 if not os.path.exists(path):
@@ -31,24 +32,37 @@ with open(path, 'r') as rfile:
         T = len(line_segs)
         print(T)
         prob = np.zeros((tag_set_size, T), dtype=np.float64)
-        backp = np.zeros((tag_set_size, T), dtype=np.float64)
+        backp = np.zeros((tag_set_size, T), dtype=np.int)
         
         # Initialization step
         for tag in tag_set:
-            print(tag)
-            obs_p = 1
+            obs_p = 0
             if line_segs[0] in p[tag]['words']:
                 obs_p = p[tag]['words'][line_segs[0]].log10()
             prob[tag_map[tag]][0] = p[tag]['tags'][start_state].log10() + obs_p
+            backp[tag_map[tag]][0] = tag_map[start_state]
+#        print(prob)
+#        print(backp)
+#        exit()
 
         # Filling the rest
         for t in range(1, T):
             for tag1 in tag_set:
+                max_val = float('-inf')
+                max_backp = float('-inf')
+                max_tag = -1
                 for tag2 in tag_set:
-                obs_p = 1
-                if line_segs[t] in p[tag]['words']:
-                    obs_p = p[tag]['words'][line_segs[t]].log10()
-                prob[tag_map[tag]][t] = p[tag]['tags'][tag].log10() + obs_p
-               
+                    obs_p = 0
+                    if line_segs[t] in p[tag2]['words']:
+                        obs_p = p[tag2]['words'][line_segs[t]].log10()
+                    temp = p[tag2]['tags'][tag1].log10() + obs_p + Decimal(prob[tag_map[tag1]][t-1])
+                    backp_temp = p[tag2]['tags'][tag1].log10() + Decimal(prob[tag_map[tag1]][t-1])
+                    if temp > max_val:
+                        max_val = temp
+                    if backp_temp > max_backp:
+                        max_tag = tag_map[tag2]
+                prob[tag_map[tag1]][t] = max_val
+                backp[tag_map[tag1]][t] = max_tag
 
         print(prob)
+        print(backp)
