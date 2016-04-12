@@ -3,6 +3,7 @@ import os
 import re
 from decimal import *
 import numpy as np
+import pickle
 
 mapping = {}
 path = sys.argv[1]
@@ -75,12 +76,14 @@ def calc_p():
             denom = 0
             if tag2 in mapping[tag1]['tags']:
                 numer = mapping[tag1]['tags'][tag2] + 1
-            p_t1_gvn_t2 = Decimal(numer)/(Decimal(mapping[tag2]['trans_denom'])+Decimal(tag_set_size-1))
+            p_t1_gvn_t2 = Decimal(numer/(mapping[tag2]['trans_denom'] + tag_set_size-1))
             p[tag1]['tags'][tag2] = p_t1_gvn_t2
         for word in mapping[tag1]['words'].keys():
-            p_w_gvn_t1 = Decimal(mapping[tag1]['words'][word])/Decimal(mapping[tag1]['emmis_denom'])
+            p_w_gvn_t1 = Decimal(mapping[tag1]['words'][word]/mapping[tag1]['emmis_denom'])
             p[tag1]['words'][word] = p_w_gvn_t1
     print(p)
+    with open('hmmmodel.txt', 'wb') as wfile:
+        pickle.dump(p, wfile)
 
 tokenize()
 calc_p()
