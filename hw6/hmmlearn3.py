@@ -81,7 +81,7 @@ def calc_p():
         for word in mapping[tag1]['words'].keys():
             p_w_gvn_t1 = Decimal(mapping[tag1]['words'][word]/mapping[tag1]['emmis_denom'])
             p[tag1]['words'][word] = p_w_gvn_t1
-    print(p)
+#    print(p)
     with open('hmmmodel.txt', 'wb') as wfile:
         pickle.dump(p, wfile)
 
