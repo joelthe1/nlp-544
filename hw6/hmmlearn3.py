@@ -78,13 +78,13 @@ def calc_p():
             if tag2 in mapping[tag1]['tags']:
                 numer = mapping[tag1]['tags'][tag2] + 1
             p_t1_gvn_t2 = Decimal(numer/(mapping[tag2]['trans_denom'] + tag_set_size))
-            p[tag1]['tags'][tag2] = p_t1_gvn_t2
+            p[tag1]['tags'][tag2] = p_t1_gvn_t2.log10()
         for word in mapping[tag1]['words'].keys():
             p_w_gvn_t1 = Decimal(mapping[tag1]['words'][word]/mapping[tag1]['emmis_denom'])
-            p[tag1]['words'][word] = p_w_gvn_t1
+            p[tag1]['words'][word] = p_w_gvn_t1.log10()
 
     p['vocab'] = vocab
-    with open('hmmmodel.txt', 'wb') as wfile:
+    with codecs.open('hmmmodel.txt', 'wb') as wfile:
         pickle.dump(p, wfile)
 
 tokenize()

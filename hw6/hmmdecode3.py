@@ -12,7 +12,6 @@ if not os.path.exists(path):
 with open('hmmmodel.txt', 'rb') as rfile:
     global p
     p = pickle.load(rfile)
-#    print(p)
 
 vocab = p['vocab']
 del p['vocab']
@@ -34,7 +33,7 @@ for line in lines:
     line_segs = line.strip().split(' ')
     T = len(line_segs)
     bp = {}
-    previous = {start_state: Decimal(0.0)}
+    prevs = {start_state: Decimal(0.0)}
 
     for index, word in enumerate(line_segs):
         curr = {}
@@ -47,11 +46,11 @@ for line in lines:
                 
             max_value = Decimal(float("-inf"))
             temp_bp = None
-            for prev_s in previous:
-                prev_p = Decimal(previous[prev_s])
-                transition_p = p[cur_s]['tags'][prev_s].log10()
+            for prev_s in prevs:
+                prev_p = Decimal(prevs[prev_s])
+                transition_p = p[cur_s]['tags'][prev_s]
                 if word in vocab:
-                    emission_p = p[cur_s]['words'][word].log10()
+                    emission_p = p[cur_s]['words'][word]
                     prob = prev_p + transition_p + emission_p
                 else:
                     prob = prev_p + transition_p
@@ -62,12 +61,12 @@ for line in lines:
             curr[cur_s] = max_value
             bp[index][cur_s] = temp_bp
 
-        previous = curr
+        prevs = curr
     
     tag = ""
     max = float("-inf")
-    for state in previous:
-        if previous[state] > max:
+    for state in prevs:
+        if prevs[state] > max:
             tag = state
             
     tag_sequence = []
