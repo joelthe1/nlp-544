@@ -2,10 +2,11 @@ import sys
 import os
 import re
 from decimal import *
-import numpy as np
 import pickle
+import codecs
 
 mapping = {}
+vocab = {}
 path = sys.argv[1]
 if not os.path.exists(path):
     print('Error! Given path is not a valid directory.')
@@ -21,7 +22,7 @@ def separate(token):
 
 def tokenize():
     print(path)
-    with open(path, 'r') as rfile:
+    with codecs.open(path, 'r', 'utf-8') as rfile:
         for line in rfile.readlines():
             if not line.strip():
                 continue
@@ -30,6 +31,7 @@ def tokenize():
 
             for seg in line_segs:
                 token = separate(seg)
+                vocab[token['word']] = True
                 insert(prev, token)
                 prev = token
 #    print mapping
@@ -80,7 +82,8 @@ def calc_p():
         for word in mapping[tag1]['words'].keys():
             p_w_gvn_t1 = Decimal(mapping[tag1]['words'][word]/mapping[tag1]['emmis_denom'])
             p[tag1]['words'][word] = p_w_gvn_t1
-#    print(p)
+
+    p['vocab'] = vocab
     with open('hmmmodel.txt', 'wb') as wfile:
         pickle.dump(p, wfile)
 

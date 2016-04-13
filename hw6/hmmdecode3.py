@@ -1,8 +1,8 @@
 import pickle
-import numpy as np
 import sys
 import os
 from decimal import *
+import codecs
 
 path = sys.argv[1]
 if not os.path.exists(path):
@@ -14,6 +14,8 @@ with open('hmmmodel.txt', 'rb') as rfile:
     p = pickle.load(rfile)
 #    print(p)
 
+vocab = p['vocab']
+del p['vocab']
 start_state = '<~s~>'
 tag_set = p.keys()
 tag_set_size = len(tag_set)
@@ -21,79 +23,67 @@ tag_map = {}
 for index, tag in enumerate(tag_set):
     tag_map[tag] = index
 
-#tag_map = {'<~s~>': 0, 'DT': 1, 'IN': 2, 'VB': 3, 'NN': 4}
+output = []
 
-#print(tag_map)
+with codecs.open(path, 'r', 'utf-8') as rfile:
+    lines = rfile.readlines()
 
-#for t in tag_set:
-#    sum = 0
-#    for w in list(p[t]['words'].keys()):
-#        sum += p[t]['words'][w]
-#    print('sum for', t, ' is: ', sum)
-#
+for line in lines:
+    if not line.strip():
+        continue
+    line_segs = line.strip().split(' ')
+    T = len(line_segs)
+    bp = {}
+    previous = {start_state: Decimal(0.0)}
 
-#for t1 in tag_set:
-#    sum = 0
-#    for t2 in tag_set:
-#        sum += p[t2]['tags'][t1]
-#    print('sum for', t2, 'given', t1,'is:', sum)
+    for index, word in enumerate(line_segs):
+        curr = {}
+        bp[index] = {}
+        for cur_s in tag_set:
+            if cur_s == start_state:
+                continue
+            if word in vocab and word not in p[cur_s]['words']:
+                continue
+                
+            max_value = Decimal(float("-inf"))
+            temp_bp = None
+            for prev_s in previous:
+                prev_p = Decimal(previous[prev_s])
+                transition_p = p[cur_s]['tags'][prev_s].log10()
+                if word in vocab:
+                    emission_p = p[cur_s]['words'][word].log10()
+                    prob = prev_p + transition_p + emission_p
+                else:
+                    prob = prev_p + transition_p
+                if prob > max_value:
+                    max_value = prob
+                    temp_bp = prev_s
 
-wfile = open('hmmoutput.txt', 'w')
-with open(path, 'r') as rfile:
-    for line in rfile.readlines():
-        if not line.strip():
-            continue
-        line_segs = line.strip().split(' ')
-        T = len(line_segs)
-        prob = np.zeros((tag_set_size, T), dtype=Decimal)
-        backp = np.zeros((tag_set_size, T), dtype=np.int)
-        
-        # Initialization step
-        for tag in tag_set:
-            if line_segs[0] in p[tag]['words']:
-                obs_p = p[tag]['words'][line_segs[0]]
-                prob[tag_map[tag]][0] = p[tag]['tags'][start_state].log10() + obs_p.log10()
-            else:
-                prob[tag_map[tag]][0] = p[tag]['tags'][start_state].log10() -999
-            backp[tag_map[tag]][0] = tag_map[start_state]
+            curr[cur_s] = max_value
+            bp[index][cur_s] = temp_bp
 
-        # Filling the rest
-        for t in range(1, T):
-            for tag1 in tag_set:
-                max_val = float('-inf')
-                max_tag = -1
-                for tag2 in tag_set:
-                    temp = p[tag1]['tags'][tag2].log10() + prob[tag_map[tag2]][t-1]
-                    if line_segs[t] in p[tag1]['words']:
-                        obs_p = p[tag1]['words'][line_segs[t]].log10()
-                        temp += obs_p
-                    else:
-                        temp -= 999
-                    if max_val < temp:
-                        max_val = temp
-                        max_tag = tag_map[tag2]
+        previous = curr
+    
+    tag = ""
+    max = float("-inf")
+    for state in previous:
+        if previous[state] > max:
+            tag = state
+            
+    tag_sequence = []
+    for x in range(T-1, -1, -1):
+        word = line_segs[x]
+        tag_sequence.append(tag)
+        tag = bp[x][tag]
+    tag_sequence.reverse()
 
-                prob[tag_map[tag1]][t] = max_val
-                backp[tag_map[tag1]][t] = max_tag
+    outline = []
+    for index, tag in enumerate(tag_sequence):
+        l = line_segs[index] + '/' + tag
+        outline.append(l)
+    tempval = ' '.join(outline) + '\n'
+    output.append(tempval)
 
-        res = []
-        max_pos = -1
-        max_val = float('-inf')
-        for tag in tag_set:
-            if prob[tag_map[tag]][T-1] > max_val:
-                max_val = prob[tag_map[tag]][T-1]
-                max_pos = tag_map[tag]
-        res.append(max_pos)
-
-        for x in range(T-1, -1, -1):
-            max_pos = backp[max_pos][x]
-            res.append(max_pos)
-
-        res.reverse()
-#        print('len res is', len(res))
-
-        for index, tag_num in enumerate(res[1:]):
-            wfile.write(line_segs[index] + '/' + list(tag_map.keys())[list(tag_map.values()).index(tag_num)] + ' ')
-        wfile.write('\n')
-
-wfile.close()
+with codecs.open('hmmoutput.txt', 'w', 'utf-8') as wfile:
+    for lines in output:
+        wfile.write(lines)
