@@ -30,8 +30,6 @@ def openup(path):
     with codecs.open(path, 'r', 'utf-8') as f:
         data = f.read().split('\n')
         return data
-#        ngrams = ngramize(data[2].strip())
-#        count(ngrams)
 
 def ngramize_and_count(sentence, n=1):
     tokens = sentence.strip().split(' ')
@@ -68,6 +66,8 @@ def mod_precision_counts(candidate_data, ref_data, n):
         candidate_counts = ngramize_and_count(sentence, n)
         if candidate_counts:
             denom += functools.reduce(lambda x,y:x+y, candidate_counts.values())
+        else:
+            denom += 1
         c += len(sentence.strip().split(' '))
         temp_r = float('inf')
         for refs in ref_data:
@@ -76,6 +76,7 @@ def mod_precision_counts(candidate_data, ref_data, n):
                 temp_r = l
             ref_counts.append(ngramize_and_count(refs[index], n))
         r += temp_r
+
         for ngram in candidate_counts:
             val = 0
             for ref in ref_counts:
@@ -105,20 +106,16 @@ if __name__ == '__main__':
     r,c = mod_p_values[0][0], mod_p_values[0][1]
 
     # Calculate BP
-    bp = None
-    if c > r:
-        bp = 1
-    else:
-        bp = exp(1-(r/c))
+    bp = 1-(r/c)
     
     print(bp)
 
     gavg = 0
     # Geometric avg. of Pn
     for p in mod_p_values:
-        gavg += log(p[2])/N
-    print(gavg)
-    exp_gavg = exp(gavg)
-
-    blue = bp*exp_gavg
-    print('BLUE score is', blue)
+        gavg += log(p[2])
+    print(gavg/4)
+    logbleu = min(bp, 0) + gavg/4
+    print('logbleu is', logbleu)
+    bleu = exp(logbleu)
+    print('BLUE score is', bleu)
