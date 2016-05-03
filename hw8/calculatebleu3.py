@@ -2,7 +2,7 @@ import codecs
 import os
 import sys
 import functools
-from decimal import *
+from math import exp, log
 
 # check for arguments
 if len(sys.argv) < 3:
@@ -55,10 +55,7 @@ def readin(path, ref=0):
         print(path)
         return openup(path)
 
-def len_diff(candidate_sentence, ref_sentence):
-    pass
-
-def mod_precision(candidate_data, ref_data, n):
+def mod_precision_counts(candidate_data, ref_data, n):
     numerator = 0
     denom = 0
     r, c = 0, 0
@@ -69,7 +66,8 @@ def mod_precision(candidate_data, ref_data, n):
         ref_counts = []
         sentence_sum = 0
         candidate_counts = ngramize_and_count(sentence, n)
-        denom += functools.reduce(lambda x,y:x+y, candidate_counts.values())
+        if candidate_counts:
+            denom += functools.reduce(lambda x,y:x+y, candidate_counts.values())
         c += len(sentence.strip().split(' '))
         temp_r = float('inf')
         for refs in ref_data:
@@ -86,7 +84,9 @@ def mod_precision(candidate_data, ref_data, n):
                         val = ref[ngram]
             sentence_sum += val
         numerator += sentence_sum
-    return (r, c, Decimal(numerator/denom))
+    if numerator == 0 or denom == 0:
+        return (r, c, 0)
+    return (r, c, numerator/denom)
 
 if __name__ == '__main__':
     ref_data = readin(ref_path, 1)
@@ -96,29 +96,29 @@ if __name__ == '__main__':
     mod_p_values = []
 
     # N in the paper.
-    N = 2
+    N = 4
 
     for n in range(1, N+1):
-        mod_p_values.append(mod_precision(candidate_data, ref_data, n))
+        mod_p_values.append(mod_precision_counts(candidate_data, ref_data, n))
     print(mod_p_values)
 
-    r,c = Decimal(mod_p_values[0][0]), Decimal(mod_p_values[0][1])
+    r,c = mod_p_values[0][0], mod_p_values[0][1]
 
     # Calculate BP
     bp = None
     if c > r:
-        bp = Decimal(1)
+        bp = 1
     else:
-        bp = Decimal(1-(r/c)).exp()
+        bp = exp(1-(r/c))
     
     print(bp)
 
     gavg = 0
     # Geometric avg. of Pn
-    for n,p in enumerate(mod_p_values):
-        gavg += Decimal(Decimal(p[2]).ln()/(n+1))
+    for p in mod_p_values:
+        gavg += log(p[2])/N
     print(gavg)
-    exp_gavg = gavg.exp()
+    exp_gavg = exp(gavg)
 
-    blue = Decimal(bp*exp_gavg)
-    print('BLUE score is %d' % blue)
+    blue = bp*exp_gavg
+    print('BLUE score is', blue)
