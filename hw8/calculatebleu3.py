@@ -66,26 +66,28 @@ def mod_precision_counts(candidate_data, ref_data, n):
         sentence_sum = 0
         print('\n candidate:', sentence)
         candidate_counts = ngramize_and_count(sentence, n)
-        print('candidate_counts:', candidate_counts)
+#        print('candidate_counts:', candidate_counts)
         if candidate_counts:
             denom += functools.reduce(lambda x,y:x+y, candidate_counts.values())
         else:
             denom += 1
-        print('denom is:', denom)
+#        print('denom is:', denom)
         cand_len = len(sentence.strip().split(' '))
-        print(cand_len, '\n')
+        print('cand_len:',cand_len, '\n')
         c += cand_len
         temp_r = float('inf')
         for refs in ref_data:
+            print(refs[index].strip().split(' '))
             l = len(refs[index].strip().split(' '))
             print('ref_len', l)
-            if temp_r > abs(l-cand_len):
+            if abs(temp_r-cand_len) > abs(l-cand_len):
                 temp_r = l
-            print('temp_r:', temp_r)
+            print('temp_r:', temp_r, '\n')
             ref_counts.append(ngramize_and_count(refs[index], n))
 #            print('ref_counts:', ref_counts)
         r += temp_r
-        print(len(candidate_counts.keys()))
+        print('r:', r)
+#        print(len(candidate_counts.keys()))
         for ngram in candidate_counts.keys():
 #            print(ngram)
             cand_count = candidate_counts[ngram]
@@ -95,10 +97,10 @@ def mod_precision_counts(candidate_data, ref_data, n):
                 if ngram in ref:
                     if val < ref[ngram]:
                         val = ref[ngram]
-                    print('ref',ref[ngram])
+#                    print('ref',ref[ngram])
             clipped_count = min(cand_count, val)
-            print('clipped', clipped_count)
-            print()
+#            print('clipped', clipped_count)
+#            print()
             sentence_sum += clipped_count
         numerator += sentence_sum
 #        print(candidate_counts, ref_counts)
