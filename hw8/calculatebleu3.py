@@ -68,25 +68,31 @@ def mod_precision_counts(candidate_data, ref_data, n):
             denom += functools.reduce(lambda x,y:x+y, candidate_counts.values())
         else:
             denom += 1
-        c += len(sentence.strip().split(' '))
+        cand_len = len(sentence.strip().split(' '))
+        c += cand_len
         temp_r = float('inf')
         for refs in ref_data:
             l = len(refs[index].strip().split(' '))
-            if temp_r > abs(l-c):
+            if temp_r > abs(l-cand_len):
                 temp_r = l
             ref_counts.append(ngramize_and_count(refs[index], n))
         r += temp_r
 
-        for ngram in candidate_counts:
+        for ngram in candidate_counts.keys():
+            cand_count = candidate_counts[ngram]
             val = 0
             for ref in ref_counts:
                 if ngram in ref:
                     if val < ref[ngram]:
                         val = ref[ngram]
-            sentence_sum += val
+            clipped_count = min(cand_count, val)
+            sentence_sum += clipped_count
         numerator += sentence_sum
+#        print(candidate_counts, ref_counts)
+#        print(numerator, denom)
     if numerator == 0 or denom == 0:
         return (r, c, 0)
+    print(numerator, denom)
     return (r, c, numerator/denom)
 
 if __name__ == '__main__':
@@ -94,6 +100,7 @@ if __name__ == '__main__':
     print(len(ref_data))
     candidate_data = readin(candidate_path)
     print(len(candidate_data))
+
     mod_p_values = []
 
     # N in the paper.
@@ -115,7 +122,9 @@ if __name__ == '__main__':
     for p in mod_p_values:
         gavg += log(p[2])
     print(gavg/4)
-    logbleu = min(bp, 0) + gavg/4
+    logbleu = min(bp, 0) + gavg/N
     print('logbleu is', logbleu)
     bleu = exp(logbleu)
     print('BLUE score is', bleu)
+    with open('bleu_out.txt', 'w',) as wfile:
+        wfile.write(str(bleu))
