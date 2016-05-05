@@ -75,3 +75,4 @@ project/
 hw6/hw6-dev-train
 hw8/refs
 hw8/candidates
+hw8/bleu_out.txt
